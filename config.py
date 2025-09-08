@@ -20,7 +20,6 @@ PRIMARY_COLOR_DARKER = os.getenv("PRIMARY_COLOR_DARKER", "#5A0728")
 LIGHT_COLOR = os.getenv("LIGHT_COLOR", "#F8F9FA")
 
 # FILES PATH
-QSS_STYLESHEET_PATH = APP_ROOT_DIR / "application" / "assets" / "styles"
 FONTS_PATH = APP_ROOT_DIR / "application" / "assets" / "fonts"
 
 # IMAGES

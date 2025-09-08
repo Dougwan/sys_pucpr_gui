@@ -23,7 +23,7 @@ class Menu(QWidget):
         super().__init__(*args, **kwargs)
 
         self._options = options
-        self.setLayout(ButtonsGrid(self._make_menu_grid_options()))
+        self.buttons_grid = ButtonsGrid(self._make_menu_grid_options())
 
         self.setStyleSheet(
             f"""

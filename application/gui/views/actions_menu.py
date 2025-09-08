@@ -3,13 +3,18 @@ from typing import Callable
 from ..widgets.menu import Menu
 from type_defs.menu import MenuOption, MenuOptions
 
+from PySide6.QtWidgets import QVBoxLayout, QLabel
 
 class ActionsMenu(Menu):
     def __init__(self, entity_id: int, go_back: Callable) -> None:
+        super().__init__(self._make_menu_options(go_back))
         self.entity_id = entity_id
-        self.options = self._make_menu_options(go_back)
 
-        super().__init__(self.options)
+        layout = QVBoxLayout()
+        self.setLayout(layout)
+
+        self.layout().addLayout(self.buttons_grid)
+
 
     def _handle_creation_action(self, *args, **kwargs) -> None:
         print('Criar', self.entity_id)
