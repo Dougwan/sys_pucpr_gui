@@ -7,6 +7,7 @@ from PySide6.QtWidgets import QLabel, QVBoxLayout
 from PySide6.QtGui import QPixmap
 from PySide6.QtCore import Qt
 
+
 def make_menu_options(option_callback: Callable) -> MenuOptions:
     entities = ["estudantes", "diciplinas", "professores", "turmas", "matrículas"]
     options = []
@@ -29,18 +30,19 @@ class MainMenu(Menu):
 
         super().__init__(self.options)
 
+        self._set_page_layout()
+        self._set_page_icon()
+
+        self.layout().addLayout(self.buttons_grid)
+
+    def _set_page_layout(self) -> None:
         layout = QVBoxLayout()
         self.setLayout(layout)
 
-        self._set_page_icon()
-        self.layout().addLayout(self.buttons_grid)
-
-
-    def _set_page_icon(self):
+    def _set_page_icon(self) -> None:
         pixmap = QPixmap(IMAGES_PATH / "icon.png")
         label = QLabel()
         label.setPixmap(pixmap)
         label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         self.layout().addWidget(label)
-        self.layout().addStretch()

@@ -4,7 +4,7 @@ from ..widgets.button import Button
 from typing import List, Callable
 from config import PRIMARY_COLOR, PRIMARY_COLOR_DARKER, LIGHT_COLOR
 from type_defs.menu import MenuOptions
-
+from PySide6.QtCore import Qt
 
 def create_button_slot(callback: Callable, *args, **kwargs) -> Callable:
     def slot():
@@ -12,6 +12,12 @@ def create_button_slot(callback: Callable, *args, **kwargs) -> Callable:
 
     return slot
 
+qss_stylesheet = f"""
+        QPushButton {{ height: 40px; font-family: Inter; font-size: 16px; border-radius: 8px; color: {PRIMARY_COLOR}; border: 2px solid {PRIMARY_COLOR}; letter-spacing: 0.8px; padding: 10px; }}
+        QPushButton::hover {{ background-color: {PRIMARY_COLOR_DARKER}; color: {LIGHT_COLOR}; border: 0px; }}
+        QPushButton::pressed {{ background-color: {PRIMARY_COLOR}; color: {LIGHT_COLOR}; border: 0px; }}
+        QPushButton::disabled {{background-color: gray; border: 0px; color: {LIGHT_COLOR}; }}
+"""
 
 class Menu(QWidget):
     def __init__(
@@ -21,17 +27,11 @@ class Menu(QWidget):
         **kwargs,
     ):
         super().__init__(*args, **kwargs)
-
         self._options = options
+        self.setStyleSheet(qss_stylesheet)
         self.buttons_grid = ButtonsGrid(self._make_menu_grid_options())
 
-        self.setStyleSheet(
-            f"""
-                  QPushButton {{ font-family: Inter; border-radius: 8px; color: {PRIMARY_COLOR}; border: 2px solid {PRIMARY_COLOR}; letter-spacing: 0.8px; padding: 10px; }}
-                  QPushButton::hover {{ background-color: {PRIMARY_COLOR_DARKER}; color: {LIGHT_COLOR}; border: 0px; }}
-                  QPushButton::pressed {{ background-color: {PRIMARY_COLOR}; color: {LIGHT_COLOR}; border: 0px; }}
-             """
-        )
+        self.setStyleSheet(qss_stylesheet)
 
     def _make_menu_grid_options(self, max_columns: int = 2) -> List[List[Button]]:
         grid = []

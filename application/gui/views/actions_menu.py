@@ -2,19 +2,31 @@ from typing import Callable
 
 from ..widgets.menu import Menu
 from type_defs.menu import MenuOption, MenuOptions
-
+from config import IMAGES_PATH
 from PySide6.QtWidgets import QVBoxLayout, QLabel
+from PySide6.QtGui import QPixmap
+from PySide6.QtCore import Qt
 
 class ActionsMenu(Menu):
     def __init__(self, entity_id: int, go_back: Callable) -> None:
         super().__init__(self._make_menu_options(go_back))
         self.entity_id = entity_id
 
+        self._set_page_layout()
+        self._set_page_icon()
+        self.layout().addLayout(self.buttons_grid)
+
+    def _set_page_layout(self) -> None:
         layout = QVBoxLayout()
         self.setLayout(layout)
 
-        self.layout().addLayout(self.buttons_grid)
+    def _set_page_icon(self) -> None:
+        pixmap = QPixmap(IMAGES_PATH / "icon.png")
+        label = QLabel()
+        label.setPixmap(pixmap)
+        label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
+        self.layout().addWidget(label)
 
     def _handle_creation_action(self, *args, **kwargs) -> None:
         print('Criar', self.entity_id)

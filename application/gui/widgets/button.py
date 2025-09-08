@@ -8,7 +8,8 @@ class Button(QPushButton):
 
     @override
     def enterEvent(self, event):
-        self.setCursor(Qt.CursorShape.PointingHandCursor)
+        cursor = Qt.CursorShape.PointingHandCursor if self.isEnabled() else Qt.CursorShape.ForbiddenCursor
+        self.setCursor(cursor)
         super().enterEvent(event)
 
     @override

@@ -12,6 +12,7 @@ class ButtonsGrid(QGridLayout):
 
         self._items = items
         self._set_buttons_in_grid()
+        self.setSpacing(5)
 
     def _get_grid_greater_column_span(self):
         greatest_column_span = 0
