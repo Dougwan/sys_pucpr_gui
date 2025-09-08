@@ -1,17 +1,20 @@
 import sys
+from PySide6.QtGui import QFontDatabase
 from PySide6.QtWidgets import QApplication
 from .views.main_window import MainWindow
-from .views.main_menu import MainMenu
+from config import QSS_STYLESHEET_PATH, FONTS_PATH
 
-from .widgets.button import Button
+
+def setup_fonts():
+    inter_font_path = str(FONTS_PATH / "inter.ttf")
+    QFontDatabase.addApplicationFont(inter_font_path)
 
 
 def run_app():
     app = QApplication(sys.argv)
+
+    setup_fonts()
+
     main_window = MainWindow(application=app)
-    main_menu = MainMenu()
-
-    main_window.add_layout(main_menu.buttons_grid)
-
     main_window.show()
     sys.exit(app.exec())
