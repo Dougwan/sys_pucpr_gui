@@ -27,9 +27,8 @@ class ActionsMenu(Menu):
         def action_callback(option: MenuOption): return self._action_callback(
             option, self._entity)
 
-        for idx, action in enumerate(actions):
+        for _, action in enumerate(actions):
             option: MenuOption = {
-                "id": idx,
                 "title": action.capitalize(),
                 "callback": action_callback,
             }
@@ -37,7 +36,6 @@ class ActionsMenu(Menu):
             options.append(option)
 
         go_back_option: MenuOption = {
-            "id": len(options),
             "title": "Voltar ao menu principal",
             "callback": self._got_to_main_menu,
         }

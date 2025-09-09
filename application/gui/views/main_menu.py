@@ -31,12 +31,13 @@ class MainMenu(Menu):
         self.layout().addWidget(label)
 
     def _make_menu_options(self) -> MenuOptions:
-        entities = ["estudantes", "diciplinas", "professores", "turmas", "matrículas"]
+        entities = ["estudantes", "diciplinas",
+                    "professores", "turmas", "matrículas"]
+
         options = []
 
-        for idx, entity in enumerate(entities):
+        for _, entity in enumerate(entities):
             option: MenuOption = {
-                "id": idx,
                 "title": entity.capitalize(),
                 "callback": self._option_callback,
             }
