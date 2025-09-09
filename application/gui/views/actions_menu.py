@@ -9,15 +9,42 @@ from PySide6.QtCore import Qt
 
 
 class ActionsMenu(Menu):
-    def __init__(self, go_back: Callable, option_callback: Callable) -> None:
-        self._go_back = go_back
-        self._option_callback = option_callback
+    def __init__(self, go_to_main_menu: Callable[[], None], action_callback: Callable[[MenuOption, MenuOption], None], entity: MenuOption) -> None:
+        self._entity = entity
+        self._got_to_main_menu = go_to_main_menu
+        self._action_callback = action_callback
 
         super().__init__(self._make_menu_options())
 
         self._set_page_layout()
         self._set_page_icon()
         self.layout().addLayout(self.buttons_grid)
+
+    def _make_menu_options(self) -> MenuOptions:
+        actions = ["incluir", "listar", "atualizar", "excluir"]
+        options = []
+
+        def action_callback(option: MenuOption): return self._action_callback(
+            option, self._entity)
+
+        for idx, action in enumerate(actions):
+            option: MenuOption = {
+                "id": idx,
+                "title": action.capitalize(),
+                "callback": action_callback,
+            }
+
+            options.append(option)
+
+        go_back_option: MenuOption = {
+            "id": len(options),
+            "title": "Voltar ao menu principal",
+            "callback": self._got_to_main_menu,
+        }
+
+        options.append(go_back_option)
+
+        return MenuOptions(options)
 
     def _set_page_layout(self) -> None:
         layout = QVBoxLayout()
@@ -30,26 +57,3 @@ class ActionsMenu(Menu):
         label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         self.layout().addWidget(label)
-
-    def _make_menu_options(self) -> MenuOptions:
-        actions = ["incluir", "listar", "atualizar", "excluir"]
-        options = []
-
-        for idx, action in enumerate(actions):
-            option: MenuOption = {
-                "id": idx,
-                "title": action.capitalize(),
-                "callback": self._option_callback,
-            }
-
-            options.append(option)
-
-        go_back_option: MenuOption = {
-            "id": len(options),
-            "title": "Voltar ao menu principal",
-            "callback": self._go_back,
-        }
-
-        options.append(go_back_option)
-
-        return MenuOptions(options)

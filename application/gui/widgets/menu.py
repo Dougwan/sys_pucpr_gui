@@ -5,13 +5,7 @@ from typing import List, Callable
 from config import PRIMARY_COLOR, PRIMARY_COLOR_DARKER, LIGHT_COLOR
 from type_defs.menu import MenuOptions, MenuOption
 from PySide6.QtCore import Qt
-
-
-def create_button_slot(callback: Callable, option: MenuOption) -> Callable:
-    def slot():
-        callback(option)
-
-    return slot
+from functools import partial
 
 
 qss_stylesheet = f"""
@@ -33,7 +27,6 @@ class Menu(QWidget):
         self._options = options
         self.setStyleSheet(qss_stylesheet)
         self.buttons_grid = ButtonsGrid(self._make_menu_grid_options())
-
         self.setStyleSheet(qss_stylesheet)
 
     def _make_menu_grid_options(self, max_columns: int = 2) -> List[List[Button]]:
@@ -41,12 +34,12 @@ class Menu(QWidget):
         menu_options = self._options
 
         for row in range(0, len(menu_options), max_columns):
-            options = menu_options[row : (row + max_columns)]
+            options = menu_options[row: (row + max_columns)]
 
             buttons = []
             for _, option in enumerate(options):
                 button = Button(option["title"].capitalize())
-                button_slot = create_button_slot(option["callback"], option)
+                button_slot = partial(option["callback"], option)
                 button.clicked.connect(button_slot)
 
                 buttons.append(button)

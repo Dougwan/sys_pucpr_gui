@@ -23,7 +23,8 @@ class MainWindow(QMainWindow):
         self._setup_window_geometry(application)
         self._setup_window_widget()
 
-        self.setStyleSheet(f"background-color:{LIGHT_COLOR}; font-family:Inter;")
+        self.setStyleSheet(
+            f"background-color:{LIGHT_COLOR}; font-family:Inter;")
 
     def _setup_window_widget(self):
         self.stack = QStackedWidget()
@@ -44,21 +45,27 @@ class MainWindow(QMainWindow):
 
     def _render_main_menu(self) -> None:
         self.main_menu = MainMenu(self._render_option_actions_page)
-        self._current_page = self.main_menu
         self.stack.addWidget(self.main_menu)
+        self.stack.setCurrentWidget(self.main_menu)
 
-    def _go_to_main_menu(self) -> None:
+    def _go_to_main_menu(self, current_widget: QWidget) -> None:
         self._set_window_title("Menu Principal")
         self.stack.setCurrentWidget(self.main_menu)
-        self.stack.removeWidget(self._current_page)
-        self._current_page.deleteLater()
+        self.stack.removeWidget(current_widget)
+        current_widget.deleteLater()
 
-    def _render_option_actions_page(self, selected_option: MenuOption) -> None:
-        self._set_window_title(selected_option["title"].capitalize())
-        self.actions_menu = ActionsMenu(self._go_to_main_menu, self._render_action_page)
-        self._current_page = self.actions_menu
+    def _render_option_actions_page(self, option: MenuOption) -> None:
+        self._set_window_title(option["title"].capitalize())
+        def go_to_main_menu(_): return self._go_to_main_menu(self.actions_menu)
+
+        self.actions_menu = ActionsMenu(
+            go_to_main_menu=go_to_main_menu,
+            action_callback=self._render_action_page,
+            entity=option
+        )
+
         self.stack.addWidget(self.actions_menu)
         self.stack.setCurrentWidget(self.actions_menu)
 
-    def _render_action_page(self, action: MenuOption) -> None:
-        print(action)
+    def _render_action_page(self, action: MenuOption, entity: MenuOption) -> None:
+        print(action, entity)
