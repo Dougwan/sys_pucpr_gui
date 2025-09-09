@@ -8,27 +8,10 @@ from PySide6.QtGui import QPixmap
 from PySide6.QtCore import Qt
 
 
-def make_menu_options(option_callback: Callable) -> MenuOptions:
-    entities = ["estudantes", "diciplinas", "professores", "turmas", "matrículas"]
-    options = []
-
-    for idx, entity in enumerate(entities):
-        option: MenuOption = {
-            "id": idx,
-            "title": entity.capitalize(),
-            "callback": option_callback,
-        }
-
-        options.append(option)
-
-    return MenuOptions(options)
-
-
 class MainMenu(Menu):
-    def __init__(self, main_window_callback: Callable) -> None:
-        self.options = make_menu_options(main_window_callback)
-
-        super().__init__(self.options)
+    def __init__(self, option_callback: Callable) -> None:
+        self._option_callback = option_callback
+        super().__init__(self._make_menu_options())
 
         self._set_page_layout()
         self._set_page_icon()
@@ -46,3 +29,18 @@ class MainMenu(Menu):
         label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         self.layout().addWidget(label)
+
+    def _make_menu_options(self) -> MenuOptions:
+        entities = ["estudantes", "diciplinas", "professores", "turmas", "matrículas"]
+        options = []
+
+        for idx, entity in enumerate(entities):
+            option: MenuOption = {
+                "id": idx,
+                "title": entity.capitalize(),
+                "callback": self._option_callback,
+            }
+
+            options.append(option)
+
+        return MenuOptions(options)

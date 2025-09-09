@@ -3,14 +3,16 @@ from ..layouts.buttons_grid import ButtonsGrid
 from ..widgets.button import Button
 from typing import List, Callable
 from config import PRIMARY_COLOR, PRIMARY_COLOR_DARKER, LIGHT_COLOR
-from type_defs.menu import MenuOptions
+from type_defs.menu import MenuOptions, MenuOption
 from PySide6.QtCore import Qt
 
-def create_button_slot(callback: Callable, *args, **kwargs) -> Callable:
+
+def create_button_slot(callback: Callable, option: MenuOption) -> Callable:
     def slot():
-        callback(*args, **kwargs)
+        callback(option)
 
     return slot
+
 
 qss_stylesheet = f"""
         QPushButton {{ height: 40px; font-family: Inter; font-size: 16px; border-radius: 8px; color: {PRIMARY_COLOR}; border: 2px solid {PRIMARY_COLOR}; letter-spacing: 0.8px; padding: 10px; }}
@@ -18,6 +20,7 @@ qss_stylesheet = f"""
         QPushButton::pressed {{ background-color: {PRIMARY_COLOR}; color: {LIGHT_COLOR}; border: 0px; }}
         QPushButton::disabled {{background-color: gray; border: 0px; color: {LIGHT_COLOR}; }}
 """
+
 
 class Menu(QWidget):
     def __init__(

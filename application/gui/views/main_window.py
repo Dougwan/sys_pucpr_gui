@@ -1,11 +1,7 @@
+from argparse import Action
 from typing import Optional
 from config import APP_NAME, WINDOW_WIDTH, WINDOW_HEIGHT, IMAGES_PATH, LIGHT_COLOR
-from PySide6.QtWidgets import (
-    QMainWindow,
-    QStackedWidget,
-    QApplication,
-    QWidget
-)
+from PySide6.QtWidgets import QMainWindow, QStackedWidget, QApplication, QWidget
 
 from .main_menu import MainMenu
 from .actions_menu import ActionsMenu
@@ -15,6 +11,7 @@ from type_defs.menu import MenuOption
 class MainWindow(QMainWindow):
     def __init__(self, application: QApplication, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
+        self._current_page = None
         self.main_menu = None
         self.actions_menu = None
 
@@ -47,16 +44,21 @@ class MainWindow(QMainWindow):
 
     def _render_main_menu(self) -> None:
         self.main_menu = MainMenu(self._render_option_actions_page)
+        self._current_page = self.main_menu
         self.stack.addWidget(self.main_menu)
 
-    def _go_to_main_menu(self, current_page: QWidget) -> None:
+    def _go_to_main_menu(self) -> None:
         self._set_window_title("Menu Principal")
         self.stack.setCurrentWidget(self.main_menu)
-        self.stack.removeWidget(current_page)
-        current_page.deleteLater()
+        self.stack.removeWidget(self._current_page)
+        self._current_page.deleteLater()
 
     def _render_option_actions_page(self, selected_option: MenuOption) -> None:
         self._set_window_title(selected_option["title"].capitalize())
-        self.actions_menu = ActionsMenu(selected_option['id'], lambda *args: self._go_to_main_menu(self.actions_menu))
+        self.actions_menu = ActionsMenu(self._go_to_main_menu, self._render_action_page)
+        self._current_page = self.actions_menu
         self.stack.addWidget(self.actions_menu)
         self.stack.setCurrentWidget(self.actions_menu)
+
+    def _render_action_page(self, action: MenuOption) -> None:
+        print(action)

@@ -7,10 +7,13 @@ from PySide6.QtWidgets import QVBoxLayout, QLabel
 from PySide6.QtGui import QPixmap
 from PySide6.QtCore import Qt
 
+
 class ActionsMenu(Menu):
-    def __init__(self, entity_id: int, go_back: Callable) -> None:
-        super().__init__(self._make_menu_options(go_back))
-        self.entity_id = entity_id
+    def __init__(self, go_back: Callable, option_callback: Callable) -> None:
+        self._go_back = go_back
+        self._option_callback = option_callback
+
+        super().__init__(self._make_menu_options())
 
         self._set_page_layout()
         self._set_page_icon()
@@ -28,29 +31,7 @@ class ActionsMenu(Menu):
 
         self.layout().addWidget(label)
 
-    def _handle_creation_action(self, *args, **kwargs) -> None:
-        print('Criar', self.entity_id)
-
-    def _handle_list_action(self, *args, **kwargs) -> None:
-        print('Listar', self.entity_id)
-
-    def _handle_update_action(self, *args, **kwargs) -> None:
-        print('Atualizar', self.entity_id)
-
-    def _handle_delete_action(self, *args, **kwargs) -> None:
-        print('Deletar', self.entity_id)
-
-    def _get_action_handler(self, action: str) -> Callable:
-        actions = {
-            'incluir': self._handle_creation_action,
-            'listar': self._handle_list_action,
-            'atualizar': self._handle_update_action,
-            'excluir': self._handle_delete_action,
-        }
-
-        return actions[action]
-
-    def _make_menu_options(self, go_back: Callable) -> MenuOptions:
+    def _make_menu_options(self) -> MenuOptions:
         actions = ["incluir", "listar", "atualizar", "excluir"]
         options = []
 
@@ -58,13 +39,17 @@ class ActionsMenu(Menu):
             option: MenuOption = {
                 "id": idx,
                 "title": action.capitalize(),
-                "callback": self._get_action_handler(action),
+                "callback": self._option_callback,
             }
 
             options.append(option)
 
-        go_back_option: MenuOption = {"id": len(options), "title": "Voltar ao menu principal", "callback": go_back}
+        go_back_option: MenuOption = {
+            "id": len(options),
+            "title": "Voltar ao menu principal",
+            "callback": self._go_back,
+        }
+
         options.append(go_back_option)
 
         return MenuOptions(options)
-
