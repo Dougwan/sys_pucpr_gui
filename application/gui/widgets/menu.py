@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QWidget
+from PySide6.QtWidgets import QWidget, QSizePolicy
 from ..layouts.buttons_grid import ButtonsGrid
 from ..widgets.button import Button
 from typing import List, Callable
@@ -39,6 +39,7 @@ class Menu(QWidget):
             buttons = []
             for _, option in enumerate(options):
                 button = Button(option["title"].capitalize())
+                button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
                 button_slot = partial(option["callback"], option)
                 button.clicked.connect(button_slot)
 
