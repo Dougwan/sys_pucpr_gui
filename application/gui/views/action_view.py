@@ -1,25 +1,31 @@
+from functools import partial
+from typing import TYPE_CHECKING
 from ..widgets.menu import Menu
-from PySide6.QtWidgets import QVBoxLayout, QWidget, QSizePolicy, QLineEdit, QLabel
+from PySide6.QtWidgets import QVBoxLayout, QWidget, QSizePolicy, QLineEdit
 from PySide6.QtCore import Qt
 from type_defs.menu import MenuOption, MenuOptions
-from typing import Callable
 from config import LIGHT_COLOR
+
+if TYPE_CHECKING:
+    from ..views.main_window import MainWindow
 
 
 class ActionView(Menu):
-    def __init__(self, go_to_action_menu: Callable[[], None], action: MenuOption, entity: MenuOption) -> None:
+    def __init__(
+        self, parent: "MainWindow", action: MenuOption, entity: MenuOption
+    ) -> None:
+        self._parent = parent
         self._action = action
         self._entity = entity
-        self._go_to_action_menu = go_to_action_menu
 
-        super().__init__([self._make_go_to_action_menu_option()])
+        super().__init__(self._make_go_to_action_menu_option())
 
         self._set_page_layout()
 
         self.panel_widget = self._set_panel_widget()
         self._create_student_creation_panel()
 
-        self.layout().addLayout(self.buttons_grid)
+        self.layout().addLayout(self.buttons_grid)  # type: ignore
 
         self.adjustSize()
 
@@ -27,16 +33,12 @@ class ActionView(Menu):
         panel_layout = QVBoxLayout()
         panel_widget = QWidget()
 
-        panel_widget.setSizePolicy(
-            QSizePolicy.Expanding, QSizePolicy.Expanding
-        )
+        panel_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)  # type: ignore
 
-        panel_widget.setStyleSheet(
-            "background-color: #e8e8e8; border-radius: 8px;"
-        )
+        panel_widget.setStyleSheet("background-color: #e8e8e8; border-radius: 8px;")
 
         panel_widget.setLayout(panel_layout)
-        self.layout().addWidget(panel_widget)
+        self.layout().addWidget(panel_widget)  # type: ignore
 
         return panel_widget
 
@@ -47,21 +49,25 @@ class ActionView(Menu):
 
         name_input.setTextMargins(10, 10, 10, 10)
 
-        name_input.setStyleSheet(f"""
+        name_input.setStyleSheet(
+            f"""
             background-color: {LIGHT_COLOR};
             border-radius: 5px;
             color: #0f0f0f;
             font-size: 16px;
-        """)
+        """
+        )
 
-        self.panel_widget.layout().addWidget(
-            name_input, alignment=Qt.AlignmentFlag.AlignTop)
+        self.panel_widget.layout().addWidget(name_input, alignment=Qt.AlignmentFlag.AlignTop)  # type: ignore
 
-    def _make_go_to_action_menu_option(self) -> MenuOption:
-        return {
+    def _make_go_to_action_menu_option(self) -> MenuOptions:
+        go_back_option: MenuOption = {
             "title": "Voltar ao menu de ações",
-            "callback": self._go_to_action_menu,
+            "callback": partial(
+                self._parent.go_to_main_menu, self, self._parent.actions_menu
+            ),
         }
+        return MenuOptions([go_back_option])
 
     def _set_page_layout(self) -> None:
         layout = QVBoxLayout()

@@ -5,7 +5,7 @@ from typing import List
 
 
 class ButtonsGrid(QGridLayout):
-    def __init__(self, items=List[List[Button]], *args, **kwargs):
+    def __init__(self, items: List[List[Button]], *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.setAlignment(Qt.AlignmentFlag.AlignBottom)

@@ -1,21 +1,17 @@
-from argparse import Action
-from typing import Optional
-from config import APP_NAME, WINDOW_WIDTH, WINDOW_HEIGHT, IMAGES_PATH, LIGHT_COLOR
-from PySide6.QtWidgets import QMainWindow, QStackedWidget, QApplication, QWidget
+from PySide6.QtWidgets import QMainWindow, QStackedWidget, QApplication
 
+from typing import Optional
 from .main_menu import MainMenu
 from .actions_menu import ActionsMenu
 from .action_view import ActionView
+from ..widgets.menu import Menu
 from type_defs.menu import MenuOption
+from config import APP_NAME, WINDOW_WIDTH, WINDOW_HEIGHT, LIGHT_COLOR
 
 
 class MainWindow(QMainWindow):
     def __init__(self, application: QApplication, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self._current_page = None
-        self.main_menu = None
-        self.actions_menu = None
-        self.action_view = None
 
         self._setup_window(application)
         self._render_main_menu()
@@ -25,8 +21,7 @@ class MainWindow(QMainWindow):
         self._setup_window_geometry(application)
         self._setup_window_widget()
 
-        self.setStyleSheet(
-            f"background-color:{LIGHT_COLOR}; font-family:Inter;")
+        self.setStyleSheet(f"background-color:{LIGHT_COLOR}; font-family:Inter;")
 
     def _setup_window_widget(self):
         self.stack = QStackedWidget()
@@ -45,11 +40,6 @@ class MainWindow(QMainWindow):
     def _set_window_title(self, title: Optional[str] = None) -> None:
         self.setWindowTitle(f"{APP_NAME} - {title}" if title else APP_NAME)
 
-    def _render_main_menu(self) -> None:
-        self.main_menu = MainMenu(self._render_option_actions_view)
-        self.stack.addWidget(self.main_menu)
-        self.stack.setCurrentWidget(self.main_menu)
-
     def _set_previous_window_title(self):
         current_window_title = self.windowTitle()
         splitted_title = current_window_title.split(" - ")
@@ -62,7 +52,9 @@ class MainWindow(QMainWindow):
 
         return "Menu Principal"
 
-    def _go_to_main_menu(self, current_widget: QWidget, previous_widget: QWidget) -> None:
+    def go_to_main_menu(
+        self, current_widget: Menu, previous_widget: Menu, *args, **kwargs
+    ) -> None:
 
         self._set_window_title(self._set_previous_window_title())
 
@@ -70,16 +62,20 @@ class MainWindow(QMainWindow):
         self.stack.removeWidget(current_widget)
         current_widget.deleteLater()
 
-    def _render_option_actions_view(self, option: MenuOption) -> None:
+    def _render_main_menu(self) -> None:
+        self.main_menu = MainMenu(self._render_actions_view)
+
+        self.stack.addWidget(self.main_menu)
+        self.stack.setCurrentWidget(self.main_menu)
+
+    def _render_actions_view(self, option: MenuOption) -> None:
+
         self._set_window_title(option["title"].capitalize())
 
-        def go_to_main_menu(_): return self._go_to_main_menu(
-            self.actions_menu, self.main_menu)
-
         self.actions_menu = ActionsMenu(
-            go_to_main_menu=go_to_main_menu,
+            parent=self,
+            entity=option,
             action_callback=self._render_action_view,
-            entity=option
         )
 
         self.stack.addWidget(self.actions_menu)
@@ -87,16 +83,10 @@ class MainWindow(QMainWindow):
 
     def _render_action_view(self, action: MenuOption, entity: MenuOption) -> None:
         self._set_window_title(
-            f"{entity["title"].capitalize()} - {action["title"].capitalize()}")
-
-        def go_to_main_menu(_): return self._go_to_main_menu(
-            self.action_view, self.actions_menu)
-
-        self.action_view = ActionView(
-            go_to_action_menu=go_to_main_menu,
-            action=action,
-            entity=entity
+            f"{entity['title'].capitalize()} - {action['title'].capitalize()}"
         )
+
+        self.action_view = ActionView(parent=self, action=action, entity=entity)
 
         self.stack.addWidget(self.action_view)
         self.stack.setCurrentWidget(self.action_view)
