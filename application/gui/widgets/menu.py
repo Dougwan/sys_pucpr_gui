@@ -1,29 +1,40 @@
-from PySide6.QtWidgets import QWidget, QSizePolicy
+from PySide6.QtWidgets import QWidget, QSizePolicy, QVBoxLayout, QLabel
+from PySide6.QtGui import QPixmap
+from PySide6.QtCore import Qt
 
 from typing import List
 from functools import partial
 
 from type_defs.menu import MenuOptions
-from config import PRIMARY_COLOR, PRIMARY_COLOR_DARKER, LIGHT_COLOR
+from config import IMAGES_PATH
 
 from ..layouts.buttons_grid import ButtonsGrid
 from ..widgets.button import Button
-
-qss_stylesheet = f"""
-        QPushButton {{ height: 40px; font-family: Inter; font-size: 16px; border-radius: 8px; color: {PRIMARY_COLOR}; border: 2px solid {PRIMARY_COLOR}; letter-spacing: 0.8px; padding: 10px; }}
-        QPushButton::hover {{ background-color: {PRIMARY_COLOR_DARKER}; color: {LIGHT_COLOR}; border: 0px; }}
-        QPushButton::pressed {{ background-color: {PRIMARY_COLOR}; color: {LIGHT_COLOR}; border: 0px; }}
-        QPushButton::disabled {{background-color: gray; border: 0px; color: {LIGHT_COLOR}; }}
-"""
 
 
 class Menu(QWidget):
     def __init__(self, options: MenuOptions):
         super().__init__()
+
         self._options = options
-        self.setStyleSheet(qss_stylesheet)
+
+        self._set_layout()
+        self._set_page_icon()
+
         self.buttons_grid = ButtonsGrid(self._make_menu_grid_options())
-        self.setStyleSheet(qss_stylesheet)
+        self.layout().addLayout(self.buttons_grid)  # type: ignore
+
+    def _set_layout(self) -> None:
+        layout = QVBoxLayout()
+        self.setLayout(layout)
+
+    def _set_page_icon(self) -> None:
+        pixmap = QPixmap(IMAGES_PATH / "icon.png")
+        label = QLabel()
+        label.setPixmap(pixmap)
+        label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.layout().addWidget(label)  # type: ignore
 
     def _make_menu_grid_options(self, max_columns: int = 2) -> List[List[Button]]:
         grid = []
@@ -36,9 +47,10 @@ class Menu(QWidget):
 
             for option in options:
                 button = Button(option["title"].capitalize())
+                button.setEnabled(option["enable"])
                 button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)  # type: ignore
-
                 button_slot = partial(option["callback"], option)
+
                 button.clicked.connect(button_slot)
 
                 buttons.append(button)

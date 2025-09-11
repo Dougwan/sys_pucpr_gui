@@ -1,10 +1,9 @@
-from PySide6.QtWidgets import QMainWindow, QStackedWidget, QApplication
+from PySide6.QtWidgets import QMainWindow, QStackedWidget, QApplication, QWidget
 
 from typing import Optional
 from .main_menu import MainMenu
 from .actions_menu import ActionsMenu
 from .action_view import ActionView
-from ..widgets.menu import Menu
 from type_defs.menu import MenuOption
 from config import APP_NAME, WINDOW_WIDTH, WINDOW_HEIGHT, LIGHT_COLOR
 
@@ -53,7 +52,7 @@ class MainWindow(QMainWindow):
         return "Menu Principal"
 
     def go_to_main_menu(
-        self, current_widget: Menu, previous_widget: Menu, *args, **kwargs
+        self, current_widget: QWidget, previous_widget: QWidget, *args, **kwargs
     ) -> None:
 
         self._set_window_title(self._set_previous_window_title())
@@ -81,12 +80,15 @@ class MainWindow(QMainWindow):
         self.stack.addWidget(self.actions_menu)
         self.stack.setCurrentWidget(self.actions_menu)
 
-    def _render_action_view(self, action: MenuOption, entity: MenuOption) -> None:
+    def _render_action_view(
+        self,
+        entity: MenuOption,
+        action: MenuOption,
+    ) -> None:
         self._set_window_title(
             f"{entity['title'].capitalize()} - {action['title'].capitalize()}"
         )
-
-        self.action_view = ActionView(parent=self, action=action, entity=entity)
+        self.action_view = ActionView(self, action, entity)
 
         self.stack.addWidget(self.action_view)
         self.stack.setCurrentWidget(self.action_view)

@@ -1,0 +1,488 @@
+diff --git a/.env.example b/.env.example
+index f7de402..bcd8a07 100644
+--- a/.env.example
++++ b/.env.example
+@@ -8,4 +8,5 @@ WINDOW_HEIGHT=600
+ #STYLE
+ PRIMARY_COLOR="#8A0538"
+ PRIMARY_COLOR_DARKER="#5A0728"
+-BACKGROUND_COLOR="#F8F9FA"
+\ No newline at end of file
++LIGHT_COLOR="#F8F9FA"
++
+diff --git a/application/gui/views/action_view.py b/application/gui/views/action_view.py
+index 997be21..457d1cd 100644
+--- a/application/gui/views/action_view.py
++++ b/application/gui/views/action_view.py
+@@ -1,40 +1,57 @@
++from PySide6.QtWidgets import QVBoxLayout, QWidget, QSizePolicy, QLineEdit, QPushButton
++from PySide6.QtCore import Qt
++
+ from functools import partial
+ from typing import TYPE_CHECKING
+-from ..widgets.menu import Menu
+-from PySide6.QtWidgets import QVBoxLayout, QWidget, QSizePolicy, QLineEdit
+-from PySide6.QtCore import Qt
+-from type_defs.menu import MenuOption, MenuOptions
+-from config import LIGHT_COLOR
++
++from ..widgets.button import Button
++from type_defs.menu import MenuOption
++from config import LIGHT_COLOR, PRIMARY_COLOR, PRIMARY_COLOR_DARKER
+ 
+ if TYPE_CHECKING:
+     from ..views.main_window import MainWindow
+ 
+ 
+-class ActionView(Menu):
++qss_stylesheet = f"""
++        QPushButton {{ height: 20px; font-family: Inter; border-radius: 8px; color: {LIGHT_COLOR}; background-color: {PRIMARY_COLOR_DARKER}; letter-spacing: 0.8px; padding: 10px; }}
++        QPushButton::hover {{ background-color: {PRIMARY_COLOR};}}
++        QPushButton::pressed {{ background-color: {PRIMARY_COLOR_DARKER};}}
++"""
++
++
++class ActionView(QWidget):
+     def __init__(
+-        self, parent: "MainWindow", action: MenuOption, entity: MenuOption
++        self,
++        parent: "MainWindow",
++        action: MenuOption,
++        entity: MenuOption,
+     ) -> None:
++        super().__init__()
++
+         self._parent = parent
+         self._action = action
+         self._entity = entity
+ 
+-        super().__init__(self._make_go_to_action_menu_option())
+-
+         self._set_page_layout()
++        self._set_page_widgets()
++        self.adjustSize()
+ 
+-        self.panel_widget = self._set_panel_widget()
+-        self._create_student_creation_panel()
++    def _set_page_layout(self) -> None:
++        layout = QVBoxLayout()
++        self.setLayout(layout)
+ 
+-        self.layout().addLayout(self.buttons_grid)  # type: ignore
++    def _set_page_widgets(self) -> None:
++        self.panel_widget = self._create_panel_widget()
++        self._create_go_to_action_menu_button()
+ 
+-        self.adjustSize()
++        if self._action["key"] == "create":
++            self._set_create_action_widgets()
+ 
+-    def _set_panel_widget(self) -> QWidget:
++    def _create_panel_widget(self) -> QWidget:
+         panel_layout = QVBoxLayout()
+         panel_widget = QWidget()
+ 
+         panel_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)  # type: ignore
+-
+         panel_widget.setStyleSheet("background-color: #e8e8e8; border-radius: 8px;")
+ 
+         panel_widget.setLayout(panel_layout)
+@@ -42,33 +59,29 @@ class ActionView(Menu):
+ 
+         return panel_widget
+ 
+-    def _create_student_creation_panel(self) -> None:
+-        name_input = QLineEdit()
++    def _create_go_to_action_menu_button(self) -> None:
++        button = Button("Voltar ao menu de ações")
++        button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)  # type: ignore
+ 
+-        name_input.setPlaceholderText("Informe o nome do estudante")
++        button_slot = partial(
++            self._parent.go_to_main_menu, self, self._parent.actions_menu
++        )
+ 
+-        name_input.setTextMargins(10, 10, 10, 10)
++        button.clicked.connect(button_slot)
++        self.layout().addWidget(button)  # type: ignore
+ 
+-        name_input.setStyleSheet(
+-            f"""
+-            background-color: {LIGHT_COLOR};
+-            border-radius: 5px;
+-            color: #0f0f0f;
+-            font-size: 16px;
+-        """
++    def _set_create_action_widgets(self) -> None:
++        input_field = QLineEdit()
++        input_field.setPlaceholderText("Digite o nome completo do estudante")
++        input_field.setTextMargins(10, 10, 10, 10)
++        input_field.setStyleSheet(
++            f"background-color: {LIGHT_COLOR}; border-radius: 5px; color: #0f0f0f; font-size: 16px;"
+         )
+ 
+-        self.panel_widget.layout().addWidget(name_input, alignment=Qt.AlignmentFlag.AlignTop)  # type: ignore
++        submit_button = QPushButton("Incuir novo aluno")
++        submit_button.setStyleSheet(qss_stylesheet)
++        submit_button.setCursor(Qt.CursorShape.PointingHandCursor)
++        submit_button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)  # type: ignore
+ 
+-    def _make_go_to_action_menu_option(self) -> MenuOptions:
+-        go_back_option: MenuOption = {
+-            "title": "Voltar ao menu de ações",
+-            "callback": partial(
+-                self._parent.go_to_main_menu, self, self._parent.actions_menu
+-            ),
+-        }
+-        return MenuOptions([go_back_option])
+-
+-    def _set_page_layout(self) -> None:
+-        layout = QVBoxLayout()
+-        self.setLayout(layout)
++        self.panel_widget.layout().addWidget(input_field, alignment=Qt.AlignmentFlag.AlignTop)  # type: ignore
++        self.panel_widget.layout().addWidget(submit_button)  # type: ignore
+diff --git a/application/gui/views/actions_menu.py b/application/gui/views/actions_menu.py
+index 7b3aa6a..dacf593 100644
+--- a/application/gui/views/actions_menu.py
++++ b/application/gui/views/actions_menu.py
+@@ -1,18 +1,32 @@
+-from PySide6.QtWidgets import QVBoxLayout, QLabel
+-from PySide6.QtGui import QPixmap
+-from PySide6.QtCore import Qt
+-
+ from functools import partial
+-from typing import TYPE_CHECKING, Callable
+-from config import IMAGES_PATH
+-
+ from ..widgets.menu import Menu
+ from type_defs.menu import MenuOption, MenuOptions
++from typing import TYPE_CHECKING, Callable, Dict, Iterator, Union
+ 
+ if TYPE_CHECKING:
+     from ..views.main_window import MainWindow
+ 
+ 
++def was_action_enabled(entity: str, action_key: str) -> bool:
++    from config import ENABLED_FEATURES
++
++    return ENABLED_FEATURES.get(entity, {}).get("actions", {}).get(action_key, False)
++
++
++def get_actions(entity: str) -> Iterator[Dict[str, Union[str, bool]]]:
++    all_actions = [
++        {"title": "incluir", "key": "create"},
++        {"title": "listar", "key": "read"},
++        {"title": "atualizar", "key": "update"},
++        {"title": "excluir", "key": "delete"},
++    ]
++
++    return map(
++        lambda action: {**action, "enabled": was_action_enabled(entity, action["key"])},
++        all_actions,
++    )
++
++
+ class ActionsMenu(Menu):
+     def __init__(
+         self,
+@@ -26,27 +40,22 @@ class ActionsMenu(Menu):
+ 
+         super().__init__(self._make_menu_options())
+ 
+-        self._set_page_layout()
+-        self._set_page_icon()
+-
+-        self.layout().addLayout(self.buttons_grid)  # type: ignore
+-
+     def _make_menu_options(self) -> MenuOptions:
+-        actions = ["incluir", "listar", "atualizar", "excluir"]
+         options = []
+ 
+-        def action_callback(option: MenuOption):
+-            return self._action_callback(option, self._entity)
+-
+-        for _, action in enumerate(actions):
++        for action in get_actions(self._entity["key"]):
+             option: MenuOption = {
+-                "title": action.capitalize(),
+-                "callback": action_callback,
++                "key": str(action["key"]),
++                "enable": bool(action.get("enabled", False)),
++                "title": str(action["title"]).capitalize(),
++                "callback": partial(self._action_callback, self._entity),
+             }
+ 
+             options.append(option)
+ 
+         go_back_option: MenuOption = {
++            "enable": True,
++            "key": "go_back",
+             "title": "Voltar ao menu principal",
+             "callback": partial(
+                 self._parent.go_to_main_menu, self, self._parent.main_menu
+@@ -56,15 +65,3 @@ class ActionsMenu(Menu):
+         options.append(go_back_option)
+ 
+         return MenuOptions(options)
+-
+-    def _set_page_layout(self) -> None:
+-        layout = QVBoxLayout()
+-        self.setLayout(layout)
+-
+-    def _set_page_icon(self) -> None:
+-        pixmap = QPixmap(IMAGES_PATH / "icon.png")
+-        label = QLabel()
+-        label.setPixmap(pixmap)
+-        label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+-
+-        self.layout().addWidget(label)  # type: ignore
+diff --git a/application/gui/views/main_menu.py b/application/gui/views/main_menu.py
+index 3a68eb1..defe1b3 100644
+--- a/application/gui/views/main_menu.py
++++ b/application/gui/views/main_menu.py
+@@ -1,4 +1,6 @@
+-from typing import Callable
++from gc import enable
++from turtle import title
++from typing import Callable, Dict, Union, Iterator
+ 
+ from ..widgets.menu import Menu
+ from type_defs.menu import MenuOption, MenuOptions
+@@ -8,37 +10,41 @@ from PySide6.QtGui import QPixmap
+ from PySide6.QtCore import Qt
+ 
+ 
+-class MainMenu(Menu):
+-    def __init__(self, option_callback: Callable) -> None:
+-        self._option_callback = option_callback
+-        super().__init__(self._make_menu_options())
++def was_entity_enabled(entity: str) -> bool:
++    from config import ENABLED_FEATURES
++
++    return ENABLED_FEATURES.get(entity, {}).get("enable", False)
+ 
+-        self._set_page_layout()
+-        self._set_page_icon()
+ 
+-        self.layout().addLayout(self.buttons_grid)
++def get_entities() -> Iterator[Dict[str, Union[str, bool]]]:
++    entities = [
++        {"title": "estudantes", "key": "students"},
++        {"title": "diciplinas", "key": "courses"},
++        {"title": "professores", "key": "teachers"},
++        {"title": "turmas", "key": "classes"},
++        {"title": "matrículas", "key": "enrollments"},
++    ]
+ 
+-    def _set_page_layout(self) -> None:
+-        layout = QVBoxLayout()
+-        self.setLayout(layout)
++    return map(
++        lambda entity: {**entity, "enabled": was_entity_enabled(entity["key"])},
++        entities,
++    )
+ 
+-    def _set_page_icon(self) -> None:
+-        pixmap = QPixmap(IMAGES_PATH / "icon.png")
+-        label = QLabel()
+-        label.setPixmap(pixmap)
+-        label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+ 
+-        self.layout().addWidget(label)
++class MainMenu(Menu):
++    def __init__(self, option_callback: Callable) -> None:
++        self._option_callback = option_callback
++        super().__init__(self._make_menu_options())
+ 
+     def _make_menu_options(self) -> MenuOptions:
+-        entities = ["estudantes", "diciplinas",
+-                    "professores", "turmas", "matrículas"]
+ 
+         options = []
+ 
+-        for _, entity in enumerate(entities):
++        for entity in get_entities():
+             option: MenuOption = {
+-                "title": entity.capitalize(),
++                "key": str(entity["key"]),
++                "title": str(entity["title"]).capitalize(),
++                "enable": bool(entity.get("enabled", False)),
+                 "callback": self._option_callback,
+             }
+ 
+diff --git a/application/gui/views/main_window.py b/application/gui/views/main_window.py
+index cb9452e..182cf88 100644
+--- a/application/gui/views/main_window.py
++++ b/application/gui/views/main_window.py
+@@ -1,10 +1,9 @@
+-from PySide6.QtWidgets import QMainWindow, QStackedWidget, QApplication
++from PySide6.QtWidgets import QMainWindow, QStackedWidget, QApplication, QWidget
+ 
+ from typing import Optional
+ from .main_menu import MainMenu
+ from .actions_menu import ActionsMenu
+ from .action_view import ActionView
+-from ..widgets.menu import Menu
+ from type_defs.menu import MenuOption
+ from config import APP_NAME, WINDOW_WIDTH, WINDOW_HEIGHT, LIGHT_COLOR
+ 
+@@ -53,7 +52,7 @@ class MainWindow(QMainWindow):
+         return "Menu Principal"
+ 
+     def go_to_main_menu(
+-        self, current_widget: Menu, previous_widget: Menu, *args, **kwargs
++        self, current_widget: QWidget, previous_widget: QWidget, *args, **kwargs
+     ) -> None:
+ 
+         self._set_window_title(self._set_previous_window_title())
+@@ -81,12 +80,15 @@ class MainWindow(QMainWindow):
+         self.stack.addWidget(self.actions_menu)
+         self.stack.setCurrentWidget(self.actions_menu)
+ 
+-    def _render_action_view(self, action: MenuOption, entity: MenuOption) -> None:
++    def _render_action_view(
++        self,
++        entity: MenuOption,
++        action: MenuOption,
++    ) -> None:
+         self._set_window_title(
+             f"{entity['title'].capitalize()} - {action['title'].capitalize()}"
+         )
+-
+-        self.action_view = ActionView(parent=self, action=action, entity=entity)
++        self.action_view = ActionView(self, action, entity)
+ 
+         self.stack.addWidget(self.action_view)
+         self.stack.setCurrentWidget(self.action_view)
+diff --git a/application/gui/widgets/button.py b/application/gui/widgets/button.py
+index edeb48b..5555266 100644
+--- a/application/gui/widgets/button.py
++++ b/application/gui/widgets/button.py
+@@ -1,15 +1,24 @@
+ from PySide6.QtWidgets import QPushButton
+ from PySide6.QtCore import Qt
+ from typing_extensions import override
++from config import PRIMARY_COLOR, PRIMARY_COLOR_DARKER, LIGHT_COLOR
++
++qss_stylesheet = f"""
++        QPushButton {{ height: 40px; font-family: Inter; font-size: 16px; border-radius: 8px; color: {PRIMARY_COLOR}; border: 2px solid {PRIMARY_COLOR}; letter-spacing: 0.8px; padding: 10px; }}
++        QPushButton::hover {{ background-color: {PRIMARY_COLOR_DARKER}; color: {LIGHT_COLOR}; border: 0px; }}
++        QPushButton::pressed {{ background-color: {PRIMARY_COLOR}; color: {LIGHT_COLOR}; border: 0px; }}
++        QPushButton::disabled {{background-color: gray; border: 0px; color: {LIGHT_COLOR}; }}
++"""
++
+ 
+ class Button(QPushButton):
+     def __init__(self, *args, **kwargs):
+         super().__init__(*args, **kwargs)
++        self.setStyleSheet(qss_stylesheet)
+ 
+     @override
+     def enterEvent(self, event):
+-        cursor = Qt.CursorShape.PointingHandCursor if self.isEnabled() else Qt.CursorShape.ForbiddenCursor
+-        self.setCursor(cursor)
++        self.setCursor(Qt.CursorShape.PointingHandCursor)
+         super().enterEvent(event)
+ 
+     @override
+diff --git a/application/gui/widgets/menu.py b/application/gui/widgets/menu.py
+index 71cb8c3..24961f7 100644
+--- a/application/gui/widgets/menu.py
++++ b/application/gui/widgets/menu.py
+@@ -1,29 +1,40 @@
+-from PySide6.QtWidgets import QWidget, QSizePolicy
++from PySide6.QtWidgets import QWidget, QSizePolicy, QVBoxLayout, QLabel
++from PySide6.QtGui import QPixmap
++from PySide6.QtCore import Qt
+ 
+ from typing import List
+ from functools import partial
+ 
+ from type_defs.menu import MenuOptions
+-from config import PRIMARY_COLOR, PRIMARY_COLOR_DARKER, LIGHT_COLOR
++from config import IMAGES_PATH
+ 
+ from ..layouts.buttons_grid import ButtonsGrid
+ from ..widgets.button import Button
+ 
+-qss_stylesheet = f"""
+-        QPushButton {{ height: 40px; font-family: Inter; font-size: 16px; border-radius: 8px; color: {PRIMARY_COLOR}; border: 2px solid {PRIMARY_COLOR}; letter-spacing: 0.8px; padding: 10px; }}
+-        QPushButton::hover {{ background-color: {PRIMARY_COLOR_DARKER}; color: {LIGHT_COLOR}; border: 0px; }}
+-        QPushButton::pressed {{ background-color: {PRIMARY_COLOR}; color: {LIGHT_COLOR}; border: 0px; }}
+-        QPushButton::disabled {{background-color: gray; border: 0px; color: {LIGHT_COLOR}; }}
+-"""
+-
+ 
+ class Menu(QWidget):
+     def __init__(self, options: MenuOptions):
+         super().__init__()
++
+         self._options = options
+-        self.setStyleSheet(qss_stylesheet)
++
++        self._set_layout()
++        self._set_page_icon()
++
+         self.buttons_grid = ButtonsGrid(self._make_menu_grid_options())
+-        self.setStyleSheet(qss_stylesheet)
++        self.layout().addLayout(self.buttons_grid)  # type: ignore
++
++    def _set_layout(self) -> None:
++        layout = QVBoxLayout()
++        self.setLayout(layout)
++
++    def _set_page_icon(self) -> None:
++        pixmap = QPixmap(IMAGES_PATH / "icon.png")
++        label = QLabel()
++        label.setPixmap(pixmap)
++        label.setAlignment(Qt.AlignmentFlag.AlignCenter)
++
++        self.layout().addWidget(label)  # type: ignore
+ 
+     def _make_menu_grid_options(self, max_columns: int = 2) -> List[List[Button]]:
+         grid = []
+@@ -36,9 +47,10 @@ class Menu(QWidget):
+ 
+             for option in options:
+                 button = Button(option["title"].capitalize())
++                button.setEnabled(option["enable"])
+                 button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)  # type: ignore
+-
+                 button_slot = partial(option["callback"], option)
++
+                 button.clicked.connect(button_slot)
+ 
+                 buttons.append(button)
+diff --git a/config.py b/config.py
+index 40e4ffd..4d0c9da 100644
+--- a/config.py
++++ b/config.py
+@@ -24,3 +24,11 @@ FONTS_PATH = APP_ROOT_DIR / "application" / "assets" / "fonts"
+ 
+ # IMAGES
+ IMAGES_PATH = APP_ROOT_DIR / "application" / "assets" / "images"
++
++# ENABLED FEATURES
++ENABLED_FEATURES = {
++    "students": {
++        "enable": True,
++        "actions": {"create": True, "read": True, "update": False, "delete": False},
++    },
++}
+diff --git a/type_defs/menu.py b/type_defs/menu.py
+index efe8da0..853cb08 100644
+--- a/type_defs/menu.py
++++ b/type_defs/menu.py
+@@ -1,9 +1,11 @@
+-from typing import TypedDict, Callable
++from typing import TypedDict, Callable, Union
+ 
+ 
+ class MenuOption(TypedDict):
++    key: str
+     title: str
+     callback: Callable
++    enable: bool
+ 
+ 
+ MenuOptions = tuple[MenuOption, ...]

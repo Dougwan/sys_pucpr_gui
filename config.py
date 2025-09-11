@@ -24,3 +24,11 @@ FONTS_PATH = APP_ROOT_DIR / "application" / "assets" / "fonts"
 
 # IMAGES
 IMAGES_PATH = APP_ROOT_DIR / "application" / "assets" / "images"
+
+# ENABLED FEATURES
+ENABLED_FEATURES = {
+    "students": {
+        "enable": True,
+        "actions": {"create": True, "read": True, "update": False, "delete": False},
+    },
+}
