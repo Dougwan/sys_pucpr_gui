@@ -35,8 +35,6 @@ class ActionView(QWidget):
         self._action = action
         self._entity = entity
 
-        self.database = []  # será refatorado.
-
         self._set_page_layout()
         self._set_page_widgets()
         self.adjustSize()
@@ -80,7 +78,3 @@ class ActionView(QWidget):
 
         button.clicked.connect(button_slot)
         self.layout().addWidget(button)  # type: ignore
-
-    def store_in_database(self, value: str) -> None:
-        self.database.append(value)
-        print(self.database)

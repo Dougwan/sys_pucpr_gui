@@ -3,6 +3,7 @@ from PySide6.QtWidgets import QLineEdit, QPushButton, QSizePolicy
 from config import LIGHT_COLOR, PRIMARY_COLOR, PRIMARY_COLOR_DARKER
 from functools import partial
 from typing import TYPE_CHECKING
+from database.database import Database
 
 if TYPE_CHECKING:
     from ..action_view import ActionView
@@ -18,12 +19,13 @@ class CreateView():
     def __init__(self, parent: "ActionView"):
         self._parent = parent
         self._create_action_widget()
+        self._database = Database()
 
     def _create_student(self, input: QLineEdit) -> None:
         if (input.text() == ""):
             return
 
-        self._parent.store_in_database(input.text())
+        self._database.add_item("students", input.text())
         input.setText("")
 
     def _create_action_widget(self) -> None:
