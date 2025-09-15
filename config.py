@@ -32,3 +32,7 @@ ENABLED_FEATURES = {
         "actions": {"create": True, "read": True, "update": False, "delete": False},
     },
 }
+
+# DATABASe
+
+DATABASE_PATH = APP_ROOT_DIR / "database"
