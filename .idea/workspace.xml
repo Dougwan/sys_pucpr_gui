@@ -4,13 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a00bb99d-be08-4949-bb9a-6ede78fe9a9d" name="Changes" comment="WIP">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/application/gui/views/actions_menu.py" beforeDir="false" afterPath="$PROJECT_DIR$/application/gui/views/actions_menu.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/application/gui/views/main_menu.py" beforeDir="false" afterPath="$PROJECT_DIR$/application/gui/views/main_menu.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/application/gui/views/main_window.py" beforeDir="false" afterPath="$PROJECT_DIR$/application/gui/views/main_window.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/application/gui/widgets/menu.py" beforeDir="false" afterPath="$PROJECT_DIR$/application/gui/widgets/menu.py" afterDir="false" />
-    </list>
+    <list default="true" id="a00bb99d-be08-4949-bb9a-6ede78fe9a9d" name="Changes" comment="WIP" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -36,6 +30,7 @@
     &quot;Python.actions_menu.executor&quot;: &quot;Run&quot;,
     &quot;Python.main.executor&quot;: &quot;Run&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
     &quot;git-widget-placeholder&quot;: &quot;main&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
@@ -56,7 +51,6 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="SDK_NAME" value="Python 3.9 virtualenv at ~/PUC/SYS_PUCPR_GUI/.venv" />
       <option name="WORKING_DIRECTORY" value="" />
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
@@ -75,8 +69,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-e03c56caf84a-JavaScript-PY-252.23892.439" />
-        <option value="bundled-python-sdk-b3ae9b5d7125-f0eec537fc84-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-252.23892.439" />
+        <option value="bundled-js-predefined-d6986cc7102b-09060db00ec0-JavaScript-PY-251.26927.90" />
+        <option value="bundled-python-sdk-41e8cd69c857-64d779b69b7a-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-251.26927.90" />
       </set>
     </attachedChunks>
   </component>
@@ -88,6 +82,9 @@
       <option name="presentableId" value="Default" />
       <updated>1757373469166</updated>
       <workItem from="1757373470252" duration="124000" />
+      <workItem from="1757969019556" duration="204000" />
+      <workItem from="1757969226262" duration="18000" />
+      <workItem from="1757969247370" duration="28000" />
     </task>
     <servers />
   </component>

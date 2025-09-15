@@ -1,13 +1,7 @@
-from gc import enable
-from turtle import title
 from typing import Callable, Dict, Union, Iterator
 
 from ..widgets.menu import Menu
 from type_defs.menu import MenuOption, MenuOptions
-from config import IMAGES_PATH
-from PySide6.QtWidgets import QLabel, QVBoxLayout
-from PySide6.QtGui import QPixmap
-from PySide6.QtCore import Qt
 
 
 def was_entity_enabled(entity: str) -> bool:
@@ -26,7 +20,8 @@ def get_entities() -> Iterator[Dict[str, Union[str, bool]]]:
     ]
 
     return map(
-        lambda entity: {**entity, "enabled": was_entity_enabled(entity["key"])},
+        lambda entity: {
+            **entity, "enabled": was_entity_enabled(entity["key"])},
         entities,
     )
 

@@ -7,6 +7,9 @@ from typing import TYPE_CHECKING
 from ..widgets.button import Button
 from type_defs.menu import MenuOption
 from config import LIGHT_COLOR, PRIMARY_COLOR, PRIMARY_COLOR_DARKER
+from .students.create_view import CreateView as StudentCreateView
+from .students.list_view import ListView as StudentListView
+
 
 if TYPE_CHECKING:
     from ..views.main_window import MainWindow
@@ -32,6 +35,8 @@ class ActionView(QWidget):
         self._action = action
         self._entity = entity
 
+        self.database = []  # será refatorado.
+
         self._set_page_layout()
         self._set_page_widgets()
         self.adjustSize()
@@ -44,15 +49,20 @@ class ActionView(QWidget):
         self.panel_widget = self._create_panel_widget()
         self._create_go_to_action_menu_button()
 
-        if self._action["key"] == "create":
-            self._set_create_action_widgets()
+        if self._action["key"] == "create" and self._entity["key"] == 'students':
+            StudentCreateView(self)
+
+        if self._action["key"] == "read" and self._entity["key"] == 'students':
+            StudentListView(self)
 
     def _create_panel_widget(self) -> QWidget:
         panel_layout = QVBoxLayout()
         panel_widget = QWidget()
 
-        panel_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)  # type: ignore
-        panel_widget.setStyleSheet("background-color: #e8e8e8; border-radius: 8px;")
+        panel_widget.setSizePolicy(
+            QSizePolicy.Expanding, QSizePolicy.Expanding)  # type: ignore
+        panel_widget.setStyleSheet(
+            "background-color: #e8e8e8; border-radius: 8px;")
 
         panel_widget.setLayout(panel_layout)
         self.layout().addWidget(panel_widget)  # type: ignore
@@ -61,7 +71,8 @@ class ActionView(QWidget):
 
     def _create_go_to_action_menu_button(self) -> None:
         button = Button("Voltar ao menu de ações")
-        button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)  # type: ignore
+        button.setSizePolicy(QSizePolicy.Expanding,
+                             QSizePolicy.Fixed)  # type: ignore
 
         button_slot = partial(
             self._parent.go_to_main_menu, self, self._parent.actions_menu
@@ -70,18 +81,6 @@ class ActionView(QWidget):
         button.clicked.connect(button_slot)
         self.layout().addWidget(button)  # type: ignore
 
-    def _set_create_action_widgets(self) -> None:
-        input_field = QLineEdit()
-        input_field.setPlaceholderText("Digite o nome completo do estudante")
-        input_field.setTextMargins(10, 10, 10, 10)
-        input_field.setStyleSheet(
-            f"background-color: {LIGHT_COLOR}; border-radius: 5px; color: #0f0f0f; font-size: 16px;"
-        )
-
-        submit_button = QPushButton("Incuir novo aluno")
-        submit_button.setStyleSheet(qss_stylesheet)
-        submit_button.setCursor(Qt.CursorShape.PointingHandCursor)
-        submit_button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)  # type: ignore
-
-        self.panel_widget.layout().addWidget(input_field, alignment=Qt.AlignmentFlag.AlignTop)  # type: ignore
-        self.panel_widget.layout().addWidget(submit_button)  # type: ignore
+    def store_in_database(self, value: str) -> None:
+        self.database.append(value)
+        print(self.database)
